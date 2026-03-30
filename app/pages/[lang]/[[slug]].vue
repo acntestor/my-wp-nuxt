@@ -1,18 +1,20 @@
 <template>
-  <div class="page-wrapper">
+  <div id="wrapper">
+    <!-- Header -->
     <Header :menu="headerData" :current-lang="lang" />
 
-    <main class="main-content">
-      <PageBuilder :blocks="pageData?.blocks || []" />
-    </main>
+    <!-- 主要內容 -->
+    <PageBuilder :blocks="pageData?.blocks || []" />
 
+    <!-- Footer -->
     <Footer :menu="footerData" :current-lang="lang" />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PageData, MenuData } from '#shared/types/wp'   // ← 修正後
+import type { PageData, MenuData } from '#shared/types/wp'
 
+// ==================== 路由與語言處理 ====================
 const route = useRoute()
 
 const lang = computed(() => {
@@ -22,6 +24,8 @@ const lang = computed(() => {
 
 const defaultSlug = import.meta.env.VITE_DEFAULT_SLUG || 'home'
 const slug = computed(() => (route.params.slug as string) || defaultSlug)
+
+// ==================== 資料獲取 ====================
 
 // 頁面資料
 const { data: pageData } = await useAsyncData<PageData>(
@@ -41,10 +45,61 @@ const { data: footerData } = await useAsyncData<MenuData>(
   `menu-footer-${lang.value}`,
   () => $fetch(`${import.meta.env.VITE_WP_API}/menu?name=footer-${lang.value}`)
 )
+
+// ==================== 特定頁面自定義 Head（CSS + JS） ====================
+const isHomePage = computed(() => slug.value === 'home')
+const isMtrshopsPage = computed(() => slug.value === 'mtrshops')
+
+// ==================== 更新頁面 Title（最重要新增部分） ====================
+useHead({
+  // 動態設定 title，如果 pageData 還沒載入完，就顯示預設文字
+  title: computed(() => {
+    if (pageData.value?.title) {
+      return lang.value === 'zh'
+        ? `${pageData.value.title}`
+        : `${pageData.value.title}`
+    }
+    return lang.value === 'zh' ? '載入中...' : 'Loading...'
+  }),
+  bodyAttrs: {
+    // 使用 computed 確保反應性
+    class: computed(() => isHomePage.value ? 'css-transitions-only-after-page-load frontPage tcPage' : '')
+  },
+
+  // 動態加入 link（CSS）
+  link: computed(() => {
+    const links = []
+
+    // 特定頁面加入額外 CSS
+    if (isMtrshopsPage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/mtrshops_styles.css'   // 或 '~/assets/css/about.css' 但在 head 中建議用絕對路徑
+      })
+    }
+
+    return links
+  }),
+
+  // 動態加入 script（JS）
+  script: computed(() => {
+    const scripts = []
+
+    if (isMtrshopsPage.value) {
+      scripts.push({
+        src: '/mtrmobile/lib/js/page-mtr-points-custom.js',     // 放在 public/assets/js/about.js
+        defer: true,                    // 或 async: true
+        type: 'text/javascript'
+      })
+    }
+
+    return scripts
+  })
+})
 </script>
 
 <style scoped>
-.page-wrapper {
+/* .page-wrapper {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -53,5 +108,5 @@ const { data: footerData } = await useAsyncData<MenuData>(
 .main-content {
   flex: 1;
   padding: 20px 0;
-}
+} */
 </style>

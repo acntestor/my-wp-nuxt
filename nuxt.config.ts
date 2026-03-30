@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   // 啟用 Tailwind（如果你安裝了）
-  modules: ['@nuxtjs/tailwindcss'],
+  // modules: ['@nuxtjs/tailwindcss'],
 
   // SSG 全靜態模式
   ssr: true,
@@ -28,8 +28,8 @@ export default defineNuxtConfig({
       crawlLinks: true,        // 自動爬取連結
       routes: [
         '/',                   // 首頁
-        '/en/sample-page',     // 你的範例頁面
-        '/zh/sample-page',
+        // '/en/sample-page',     // 你的範例頁面
+        // '/zh/sample-page',
       ],
     },
   },
@@ -40,4 +40,51 @@ export default defineNuxtConfig({
       // 目前先手動加入，之後可改成自動 fetch
     },
   },
+
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'stylesheet',
+          href: '/mtrmobile/lib/css/bootstrap-5.3.2.min.css'
+        },
+        {
+          rel: 'stylesheet',
+          href: '/mtrmobile/lib/css/reset.css'
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap'
+        },
+        {
+          rel: 'stylesheet',
+          href: '/mtrmobile/lib/css/lightslider.css'
+        },
+        {
+          rel: 'stylesheet',
+          href: '/mtrmobile/lib/css/sharestyles.css'
+        },
+        {
+          rel: 'stylesheet',
+          href: '/mtrmobile/lib/css/frontstyles.css'
+        },
+        {
+          rel: 'stylesheet',
+          href: '/mtrmobile/lib/css/bootstrap-icons-1.3.0.css'
+        },
+      ],
+      script: [
+        { src: '/mtrmobile/lib/js/jquery-3.3.1.min.js'},
+        // { src: '/mtrmobile/lib/js/header.js'},
+        // { src: '/mtrmobile/lib/js/footer.js'},
+        { src: '/mtrmobile/lib/js/TweenMax.min.js'},
+        { src: '/mtrmobile/lib/js/lightslider.js'},
+        { src: '/mtrmobile/lib/js/page-custom.js'},
+      ]
+    }
+  },
+
+  css: [
+    '~/assets/css/global.css',
+  ],
 })

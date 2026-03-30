@@ -1,29 +1,54 @@
 <template>
-    <header class="header">
-        <div class="container">
-            <nav class="nav">
-                <!-- Logo -->
-                <NuxtLink v-if="logoItem" :to="`/${currentLang}/`" class="logo-link">
-                    <img :src="logoItem.url" alt="MTR Logo" class="logo" />
-                </NuxtLink>
-
-                <!-- 選單 -->
-                <ul class="menu">
-                    <li v-for="item in menuItems" :key="item.id" class="menu-item">
-                        <NuxtLink :to="getFullUrl(item.url)" class="menu-link">
-                            {{ item.title }}
+    <header class="desktop">
+        <div class="headerInner">
+            <div class="tWrap">
+                <div class="tRow">
+                    <div class="logoCol tCell">
+                        <!-- Logo -->
+                        <NuxtLink v-if="logoItem" :to="`/${currentLang}/`" title="MTR logo">
+                            <img :src="logoItem.url" alt="MTR Logo" />
                         </NuxtLink>
-                    </li>
-                </ul>
-
-                <!-- 語言切換 -->
-                <LanguageSwitcher :current-lang="currentLang" />
-            </nav>
+                    </div>
+                    <div class="navGroupCol tCell">
+                        <div class="tWrap">
+                            <div class="tRow">
+                                <div class="navCol tCell">
+                                    <!-- 選單 -->
+                                    <ul class="menu">
+                                        <li v-for="(item, index) in menuItems" :key="item.id" class="[`m${index + 1}`]">
+                                            <NuxtLink :to="getFullUrl(item.url)">
+                                                {{ decodeTitle(item.title) }}
+                                            </NuxtLink>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="sepCol tCell"></div>
+                                <div class="miscCol tCell">
+                                    <ul>
+                                        <li class="fontSize">
+                                            <dl>
+                                                <dd class="active"><a href="javascript:changeSize(0);" class="min">A</a>
+                                                </dd>
+                                                <dd><a href="javascript:changeSize(1);" class="mid">A</a></dd>
+                                                <dd><a href="javascript:changeSize(2);" class="max">A</a></dd>
+                                            </dl>
+                                        </li>
+                                        <!-- 語言切換 -->
+                                        <LanguageSwitcher :current-lang="currentLang" />
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 </template>
 
 <script setup lang="ts">
+import he from 'he'
+
 const props = defineProps<{
     menu: any
     currentLang: 'en' | 'zh'
@@ -41,69 +66,6 @@ const getFullUrl = (url: string) => {
     const clean = url.replace(/^\/|\/$/g, '')
     return clean === 'home' || !clean ? `/${props.currentLang}/` : `/${props.currentLang}/${clean}/`
 }
+
+const decodeTitle = (title: string) => he.decode(title || '')
 </script>
-
-<style scoped>
-.header {
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 80px;
-}
-
-.logo-link {
-    display: flex;
-    align-items: center;
-}
-
-.logo {
-    height: 48px;
-    width: auto;
-}
-
-.menu {
-    display: flex;
-    list-style: none;
-    gap: 32px;
-    margin: 0;
-    padding: 0;
-}
-
-.menu-link {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-.menu-link:hover {
-    color: #007bff;
-}
-
-.menu-link.router-link-active {
-    color: #007bff;
-    font-weight: 600;
-}
-
-/* 響應式：小於 768px 時隱藏選單（你可以之後再加 hamburger） */
-@media (max-width: 768px) {
-    .menu {
-        display: none;
-    }
-}
-</style>

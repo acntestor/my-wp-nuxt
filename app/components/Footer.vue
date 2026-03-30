@@ -1,26 +1,60 @@
 <template>
-    <footer class="footer">
-        <div class="container">
-            <ul class="footer-menu">
-                <li v-for="item in menu.items" :key="item.id" class="footer-item">
-                    <NuxtLink :to="getFullUrl(item.url)" class="footer-link">
-                        {{ item.title }}
-                    </NuxtLink>
-                </li>
-            </ul>
+    <div class="footerContactRow">
+        <div class="footerInner">
+            <div class="tWrap">
+                <div class="tRow">
+                    <div class="lCol tCell">
+                        <a href="https://www.instagram.com/mtrhk/" target="_blank">
+                            <img src="/mtrmobile/lib/images/cmn/ico-instagram.png" />
+                        </a>
+                        <a href="https://www.facebook.com/mtrhk" target="_blank">
+                            <img src="/mtrmobile/lib/images/cmn/ico-facebook.png" />
+                        </a>
+                        <a href="https://www.youtube.com/user/mtrhongkong" target="_blank">
+                            <img src="/mtrmobile/lib/images/cmn/ico-youtube.png" />
+                        </a>
+                    </div>
+                    <div class="mCol tCell">
+                        <ul class="footer-menu">
+                            <li v-for="item in menu.items" :key="item.id">
+                                <NuxtLink :to="getFullUrl(item.url)">
+                                    {{ item.title }}
+                                </NuxtLink>
+                            </li>
+                        </ul>
+                    </div>
 
-            <div class="copyright">
-                © {{ new Date().getFullYear() }} MTR. All rights reserved.
+                    <!-- 版權（這裡用 Vue 綁定，不需要 jQuery） -->
+                    <div class="rCol tCell" id="copyright">
+                        Copyright © {{ currentYear }} MTR Mobile. All Rights Reserved.
+                    </div>
+
+                    <!-- Copyright &copy;
+                    <script>document.write(new Date().getFullYear());</script> MTR Mobile. All Right Reserved. -->
+                </div>
             </div>
         </div>
-    </footer>
+    </div>
+    <!-- <button id="backToTop" class="rounded-circle p-3">
+        <i class="bi bi-arrow-up"></i>
+    </button> -->
+    <!-- 返回頂部按鈕 -->
+    <button id="backToTop" class="rounded-circle p-3" :class="{ show: isVisible }" @click="scrollToTop"
+        aria-label="返回頁面頂部">
+        <i class="bi bi-arrow-up"></i>
+    </button>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+
 const props = defineProps<{
     menu: any
     currentLang: 'en' | 'zh'
 }>()
+
+const currentYear = new Date().getFullYear()
+const isVisible = ref(false)
 
 const getFullUrl = (url: string) => {
     const clean = url.replace(/^\/|\/$/g, '')
@@ -28,56 +62,58 @@ const getFullUrl = (url: string) => {
         ? `/${props.currentLang}/`
         : `/${props.currentLang}/${clean}/`
 }
+
+// 監聽滾動事件
+const handleScroll = () => {
+    isVisible.value = document.documentElement.scrollTop > 100
+}
+
+// 點擊返回頂部
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    })
+}
+
+// 組件掛載時加入事件監聽
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll)
+})
+
+// 組件卸載時移除事件監聽（避免記憶體洩漏）
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
-<style scoped>
-.footer {
-    background-color: #1a1a1a;
-    color: #ddd;
-    padding: 40px 0 20px;
-    margin-top: 60px;
+<style>
+#backToTop {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none;
+    z-index: 1000;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: 0px;
+    border-radius: 50% !important;
+    padding: 1rem !important;
+    cursor: pointer;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+#backToTop.show {
+    opacity: 1;
+    visibility: visible;
+    display: block;
 }
 
-.footer-menu {
-    display: flex;
-    list-style: none;
-    gap: 24px;
-    margin: 0 0 20px 0;
-    padding: 0;
-    justify-content: center;
+#backToTop:hover {
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
-.footer-link {
-    color: #ddd;
+a {
     text-decoration: none;
-    font-size: 15px;
-    transition: color 0.3s;
-}
-
-.footer-link:hover {
-    color: #fff;
-}
-
-.copyright {
-    text-align: center;
-    font-size: 14px;
-    opacity: 0.7;
-    border-top: 1px solid #333;
-    padding-top: 20px;
-}
-
-/* 響應式 */
-@media (max-width: 768px) {
-    .footer-menu {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
 }
 </style>

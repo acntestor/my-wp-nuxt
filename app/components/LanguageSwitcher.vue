@@ -1,21 +1,29 @@
 <template>
-    <div class="switcher">
-        <button v-for="lang in ['en', 'zh']" :key="lang" :class="{ active: currentLang === lang }"
-            @click="switchTo(lang)">
-            {{ lang === 'en' ? 'English' : '中文' }}
-        </button>
-    </div>
+    <li class="lang">
+        <a v-for="lang in languages" :key="lang" href="javascript:;" :class="{ active: currentLang === lang }"
+            @click.prevent="switchTo(lang)">
+            {{ lang === 'en' ? 'EN' : '中文' }}
+        </a>
+    </li>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ currentLang: 'en' | 'zh' }>()
+const languages = ['en', 'zh'] as const
+type Language = typeof languages[number]   // 'en' | 'zh'
+
+const props = defineProps<{ currentLang: Language }>()
+
 const route = useRoute()
 
-const switchTo = (target: 'en' | 'zh') => {
+const switchTo = (target: Language) => {
     const segments = route.path.split('/').filter(Boolean)
-    // 第一段一定是語言（因為 root 已 redirect 到 /en/）
-    if (segments[0]) segments[0] = target
-    else segments.unshift(target)
+
+    if (segments[0] === 'en' || segments[0] === 'zh') {
+        segments[0] = target
+    } else {
+        segments.unshift(target)
+    }
+
     navigateTo('/' + segments.join('/'))
 }
 </script>
