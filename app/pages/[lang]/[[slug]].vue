@@ -48,7 +48,11 @@ const { data: footerData } = await useAsyncData<MenuData>(
 
 // ==================== 特定頁面自定義 Head（CSS + JS） ====================
 const isHomePage = computed(() => slug.value === 'home')
+const isMtrmallsPage = computed(() => slug.value === 'mtrmalls')
 const isMtrshopsPage = computed(() => slug.value === 'mtrshops')
+const isEstorePage = computed(() => slug.value === 'estore')
+
+const isSitemapPage = computed(() => slug.value === 'sitemap')
 
 // ==================== 更新頁面 Title（最重要新增部分） ====================
 useHead({
@@ -63,7 +67,31 @@ useHead({
   }),
   bodyAttrs: {
     // 使用 computed 確保反應性
-    class: computed(() => isHomePage.value ? 'css-transitions-only-after-page-load frontPage tcPage' : '')
+    class: computed(() => {
+      let className = ""
+      switch (slug.value) {
+        case 'home':
+          className = 'css-transitions-only-after-page-load frontPage tcPage';
+          break;
+        case 'mtrmalls':
+          className = 'css-transitions-only-after-page-load tcPage mtrmallsPage';
+          break;
+        case 'mtrshops':
+          className = 'css-transitions-only-after-page-load tcPage mtrshopsPage';
+          break;
+        case 'estore':
+          className = 'css-transitions-only-after-page-load tcPage eStorePage';
+          break;
+        case 'sitemap':
+          className = 'css-transitions-only-after-page-load generalPage tcPage';
+          break;
+
+        default:
+          break;
+      }
+      // return isHomePage.value ? 'css-transitions-only-after-page-load frontPage tcPage' : ''
+      return className;
+    })
   },
 
   // 動態加入 link（CSS）
@@ -71,10 +99,31 @@ useHead({
     const links = []
 
     // 特定頁面加入額外 CSS
+    if (isMtrmallsPage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/mtrmalls_styles.css'
+      })
+    }
+
     if (isMtrshopsPage.value) {
       links.push({
         rel: 'stylesheet',
         href: '/mtrmobile/lib/css/mtrshops_styles.css'   // 或 '~/assets/css/about.css' 但在 head 中建議用絕對路徑
+      })
+    }
+
+    if (isEstorePage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/e_store_styles.css'
+      })
+    }
+
+    if (isSitemapPage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/general_pages_styles.css'
       })
     }
 

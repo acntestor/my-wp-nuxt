@@ -8,6 +8,7 @@ const props = defineProps<{
 const renderBlock = (b: any) => {
   if (!b) return null;
   if (b.blockName == null) return null;
+  if (b?.metadata?.blockVisibility != undefined && b.metadata.blockVisibility == false) return null;
 
   // 空白區塊
   if (!b.blockName && (!b.innerHTML || b.innerHTML.trim() === "")) {

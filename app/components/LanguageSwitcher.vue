@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-const languages = ['en', 'zh'] as const
+const languages = ['zh', 'en'] as const
 type Language = typeof languages[number]   // 'en' | 'zh'
 
 const props = defineProps<{ currentLang: Language }>()

@@ -1,4 +1,25 @@
 <template>
+    <div class="appFooterRow"><a name="download"></a>
+        <div class="contentInner">
+            <h4>{{ footerText.download }}</h4>
+            <div class="appRow">
+                <img src="/mtrmobile/lib/images/cmn/ico-mtr-app.png" :alt="footerText.mtrImg1Alt"
+                    :title="footerText.mtrImg1Title" />
+                <img src="/mtrmobile/lib/images/cmn/img-mtr-app-qr-code.png" :alt="footerText.mtrImg2Alt"
+                    :title="footerText.mtrImg2Title" />
+            </div>
+            <div class="downloadAppRow">
+                <a href="https://play.google.com/store/apps/details?id=com.mtr.mtrmobile" target="_blank"
+                    :title="footerText.gooAtagTitle"><img src="/mtrmobile/lib/images/cmn/img-google-play.png"
+                        :alt="footerText.gooImgAlt" /></a>
+                <a href="https://apps.apple.com/us/app/mtr-mobile/id369295276" target="_blank"
+                    :title="footerText.appAtagTitle"><img src="/mtrmobile/lib/images/cmn/img-app-store.png"
+                        :alt="footerText.appImgAlt" /></a>
+            </div>
+            <p style="text-align: center; padding: 20px 0px;"><a target="_blank" href="/mtrmobile/ch/apk-download"
+                    style="font-size:1.167rem; color:#000000; text-decoration:underline;">{{ footerText.more }}</a></p>
+        </div>
+    </div>
     <div class="footerContactRow">
         <div class="footerInner">
             <div class="tWrap">
@@ -29,15 +50,11 @@
                         Copyright © {{ currentYear }} MTR Mobile. All Rights Reserved.
                     </div>
 
-                    <!-- Copyright &copy;
-                    <script>document.write(new Date().getFullYear());</script> MTR Mobile. All Right Reserved. -->
                 </div>
             </div>
         </div>
     </div>
-    <!-- <button id="backToTop" class="rounded-circle p-3">
-        <i class="bi bi-arrow-up"></i>
-    </button> -->
+
     <!-- 返回頂部按鈕 -->
     <button id="backToTop" class="rounded-circle p-3" :class="{ show: isVisible }" @click="scrollToTop"
         aria-label="返回頁面頂部">
@@ -55,6 +72,36 @@ const props = defineProps<{
 
 const currentYear = new Date().getFullYear()
 const isVisible = ref(false)
+
+const footerText = computed(() => {
+    if (props.currentLang === 'zh') {
+        return {
+            download: '立即下載',
+            mtrImg1Alt: 'MTR APP 下載',
+            mtrImg1Title: 'MTR APP 下載',
+            mtrImg2Alt: 'MTR App 下載二維碼',
+            mtrImg2Title: 'MTR App 下載二維碼',
+            gooAtagTitle: 'Google play',
+            gooImgAlt: 'Google play',
+            appAtagTitle: 'App Store',
+            appImgAlt: 'App Store',
+            more: '了解如何透過APK檔下載MTR Mobile'
+        }
+    } else {
+        return {
+            download: 'Download now',
+            mtrImg1Alt: 'MTR APP Download',
+            mtrImg1Title: 'MTR APP Download',
+            mtrImg2Alt: 'MTR App Download QR Code',
+            mtrImg2Title: 'MTR App Download QR Code',
+            gooAtagTitle: 'Google play',
+            gooImgAlt: 'Google play',
+            appAtagTitle: 'App Store',
+            appImgAlt: 'App Store',
+            more: 'Find out how to install MTR Mobile via APK file'
+        }
+    }
+})
 
 const getFullUrl = (url: string) => {
     const clean = url.replace(/^\/|\/$/g, '')

@@ -1,4 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const legacyScripts = [
+  { src: '/mtrmobile/lib/js/TweenMax.min.js' },
+  { src: '/mtrmobile/lib/js/lightslider.js' },
+  { src: '/mtrmobile/lib/js/page-custom.js' },
+]
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -12,6 +18,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8083',
+      legacyScripts
     },
   },
   // 關鍵：擴展 TypeScript 配置，讓 process 有類型
@@ -74,12 +81,12 @@ export default defineNuxtConfig({
         },
       ],
       script: [
-        { src: '/mtrmobile/lib/js/jquery-3.3.1.min.js'},
-        // { src: '/mtrmobile/lib/js/header.js'},
-        // { src: '/mtrmobile/lib/js/footer.js'},
-        { src: '/mtrmobile/lib/js/TweenMax.min.js'},
-        { src: '/mtrmobile/lib/js/lightslider.js'},
-        { src: '/mtrmobile/lib/js/page-custom.js'},
+        { src: '/mtrmobile/lib/js/jquery-3.3.1.min.js' },
+        {
+          src: '/mtrmobile/lib/js/bootstrap-5.3.2.min.js',
+          tagPosition: 'bodyClose'
+        },
+
       ]
     }
   },
