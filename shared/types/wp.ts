@@ -15,6 +15,11 @@ export interface PageData {
     language: string
     requested_lang: string
     blocks: PageBlock[]
+    code: string | null
+    message: string | null
+    data: {
+        status: string | number
+    } | null
 }
 
 export interface MenuItem {

@@ -1,13 +1,20 @@
 <template>
   <div id="wrapper">
-    <!-- Header -->
-    <Header :menu="headerData" :current-lang="lang" />
 
-    <!-- 主要內容 -->
-    <PageBuilder :blocks="pageData?.blocks || []" />
+    <!-- 正常頁面 -->
+    <template v-if="!is404Page">
+      <!-- Header -->
+      <Header :menu="headerData" :current-lang="lang" />
+      <!-- 主要內容 -->
+      <PageBuilder :blocks="pageData?.blocks || []" />
+      <!-- Footer -->
+      <Footer :menu="footerData" :current-lang="lang" />
+    </template>
 
-    <!-- Footer -->
-    <Footer :menu="footerData" :current-lang="lang" />
+    <!-- 404 頁面：只顯示 PageBuilder（內容來自 404-page API） -->
+    <template v-else>
+      <PageBuilder :blocks="pageData?.blocks || []" />
+    </template>
   </div>
 </template>
 
@@ -22,29 +29,81 @@ const lang = computed(() => {
   return (paramLang === 'zh' || paramLang === 'en') ? paramLang : 'en'
 })
 
-const defaultSlug = import.meta.env.VITE_DEFAULT_SLUG || 'home'
-const slug = computed(() => (route.params.slug as string) || defaultSlug)
+// 關鍵修正：正確處理單層與多層 slug
+const slugParts = computed<string[]>(() => {
+  const param = route.params.slug
+  if (!param) return []
+  if (Array.isArray(param)) {
+    return param.filter((p): p is string => Boolean(p))
+  }
+  return [param as string].filter(Boolean)
+})
+
+const slug = computed(() => {
+  return slugParts.value.length > 0
+    ? slugParts.value.join('/')
+    : (import.meta.env.VITE_DEFAULT_SLUG || 'home') // default slug
+})
+
+console.log(`路徑: /${lang.value}/${slugParts.value.join('/') || ''}  →  fullSlug: "${slug.value}"`)
 
 // ==================== 資料獲取 ====================
 
-// 頁面資料
-const { data: pageData } = await useAsyncData<PageData>(
+// 獲取頁面資料（支援 test/test-1 這種多層 slug）
+// const { data: pageData1 } = await useAsyncData<PageData>(
+//   `page-${slug.value}-${lang.value}`,
+//   () => $fetch(`${import.meta.env.VITE_WP_API}/page-blocks?slug=${slug.value}&lang=${lang.value}`),
+//   { watch: [slug, lang] }
+// )
+const { data: originalPageData } = await useAsyncData<PageData>(
   `page-${slug.value}-${lang.value}`,
-  () => $fetch(`${import.meta.env.VITE_WP_API}/page-blocks?slug=${slug.value}&lang=${lang.value}`),
+  () => $fetch(`${import.meta.env.VITE_WP_API}/page-blocks?slug=${slug.value}&lang=${lang.value}`, {
+    ignoreResponseError: true   // 重要：讓 404 時也能拿到 response body
+  }),
   { watch: [slug, lang] }
 )
 
-// Header Menu
-const { data: headerData } = await useAsyncData<MenuData>(
-  `menu-header-${lang.value}`,
-  () => $fetch(`${import.meta.env.VITE_WP_API}/menu?name=header-${lang.value}`)
+// 判斷是否為 404
+const is404Page = computed(() => {
+  const data = originalPageData.value
+
+  if (!data) return false
+  return data.code === 'no_page' || (data.data && data.data.status === 404)
+})
+console.log("is404Page=" + is404Page.value)
+
+// ==================== 最終 pageData（修正 TypeScript 錯誤） ====================
+const { data: pageData } = await useAsyncData<PageData>(
+  `page-final-${slug.value}-${lang.value}`,
+  () => {
+    if (is404Page.value) {
+      return $fetch(`${import.meta.env.VITE_WP_API}/page-blocks?slug=${import.meta.env.VITE_NOT_FOUND_SLUG}&lang=en`)
+    }
+    // 這裡使用 ! 告訴 TS 不為 undefined（因為 is404Page 已排除）
+    return Promise.resolve(originalPageData.value!)
+  },
+  { watch: [is404Page, lang] }
 )
 
-// Footer Menu
+// ==================== Header & Footer（只有非 404 時載入） ====================
+const { data: headerData } = await useAsyncData<MenuData>(
+  `menu-header-${lang.value}`,
+  () => $fetch(`${import.meta.env.VITE_WP_API}/menu?name=header-${lang.value}`),
+  { watch: [lang], immediate: !is404Page.value }
+)
+
 const { data: footerData } = await useAsyncData<MenuData>(
   `menu-footer-${lang.value}`,
-  () => $fetch(`${import.meta.env.VITE_WP_API}/menu?name=footer-${lang.value}`)
+  () => $fetch(`${import.meta.env.VITE_WP_API}/menu?name=footer-${lang.value}`),
+  { watch: [lang], immediate: !is404Page.value }
 )
+
+// ==================== 設定 404 狀態碼 ====================
+// if (is404Page.value && process.server) {
+//   setResponseStatus(404)
+//   // 如果你想同時設定 statusText，也可以這樣寫：
+//   // setResponseStatus(404, 'Page Not Found')
+// }
 
 // ==================== 特定頁面自定義 Head（CSS + JS） ====================
 const isHomePage = computed(() => slug.value === 'home')
@@ -89,7 +148,6 @@ useHead({
         default:
           break;
       }
-      // return isHomePage.value ? 'css-transitions-only-after-page-load frontPage tcPage' : ''
       return className;
     })
   },
