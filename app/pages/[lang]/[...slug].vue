@@ -107,6 +107,8 @@ const { data: footerData } = await useAsyncData<MenuData>(
 
 // ==================== 特定頁面自定義 Head（CSS + JS） ====================
 const isHomePage = computed(() => slug.value === 'home')
+const isMtrPointsEarnPage = computed(() => slug.value === 'mtrpoints/earn')
+const isMtrPointsEarnViaGamePage = computed(() => slug.value === 'mtrpoints/earn-via-game')
 const isMtrmallsPage = computed(() => slug.value === 'mtrmalls')
 const isMtrshopsPage = computed(() => slug.value === 'mtrshops')
 const isEstorePage = computed(() => slug.value === 'estore')
@@ -131,6 +133,12 @@ useHead({
       switch (slug.value) {
         case 'home':
           className = 'css-transitions-only-after-page-load frontPage tcPage';
+          break;
+        case 'mtrpoints/earn':
+          className = 'css-transitions-only-after-page-load tcPage mtrpointsPage blueCrossPage';
+          break;
+        case 'mtrpoints/earn-via-game':
+          className = 'css-transitions-only-after-page-load tcPage mtrpointsPage hsbcPage_update';
           break;
         case 'mtrmalls':
           className = 'css-transitions-only-after-page-load tcPage mtrmallsPage';
@@ -157,6 +165,27 @@ useHead({
     const links = []
 
     // 特定頁面加入額外 CSS
+    if (isMtrPointsEarnViaGamePage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/transport_styles.css'
+      })
+    }
+
+    if (isMtrPointsEarnPage.value || isMtrPointsEarnViaGamePage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/mtrpoints_styles.css'
+      })
+    }
+
+    if (isMtrPointsEarnPage.value || isMtrPointsEarnViaGamePage.value) {
+      links.push({
+        rel: 'stylesheet',
+        href: '/mtrmobile/lib/css/mtrpoints_styles.css'
+      })
+    }
+
     if (isMtrmallsPage.value) {
       links.push({
         rel: 'stylesheet',
@@ -192,7 +221,7 @@ useHead({
   script: computed(() => {
     const scripts = []
 
-    if (isMtrshopsPage.value) {
+    if (isMtrPointsEarnPage.value || isMtrshopsPage.value) {
       scripts.push({
         src: '/mtrmobile/lib/js/page-mtr-points-custom.js',     // 放在 public/assets/js/about.js
         defer: true,                    // 或 async: true
